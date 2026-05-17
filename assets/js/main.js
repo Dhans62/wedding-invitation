@@ -42,8 +42,8 @@
             mainContent.classList.add('visible');
             window.scrollTo({ top: 0, behavior: 'instant' });
 
-            // Mulai audio
-            if (window.WeddingAudio) window.WeddingAudio.init();
+            // Mulai audio (autoPlay=true karena ada gesture klik)
+            if (window.WeddingAudio) window.WeddingAudio.init(true);
 
             // Inisiasi observer setelah konten tampil
             initObserver();
@@ -62,6 +62,11 @@
 
       // Langsung init observer
       initObserver();
+
+      // Init audio — button harus tampil meski tidak autoplay
+      // (refresh tidak punya gesture, browser blokir autoplay,
+      //  tapi button tetap muncul agar user bisa klik manual)
+      if (window.WeddingAudio) window.WeddingAudio.init(false);
 
       // Scroll ke posisi tersimpan (opsional)
       const savedPos = sessionStorage.getItem('scrollPos');

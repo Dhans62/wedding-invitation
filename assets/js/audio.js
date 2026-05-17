@@ -107,20 +107,30 @@
   // ================================================
   // INIT — dipanggil oleh main.js setelah klik "Buka Undangan"
   // ================================================
-  function init() {
+  function init(autoPlay) {
     if (state.initialized) return;
     state.initialized = true;
 
     const { btnAudio } = getEls();
 
-    // Tampilkan floating button
+    // Selalu tampilkan button — lepas class hidden tanpa syarat
     if (btnAudio) {
       btnAudio.classList.remove('hidden');
       btnAudio.addEventListener('click', toggleAudio);
     }
 
+    // Langsung update UI ke state "playing" sebelum play()
+    // supaya button terlihat meski audio belum ready
+    syncUI(true);
+
     initVisibilityHandler();
-    play();
+
+    // autoPlay false = refresh/session restore, tanya user intent
+    // Browser modern memblokir autoplay tanpa gesture — play() tetap
+    // dicoba, gagal pun button sudah tampil dan bisa diklik manual
+    if (autoPlay !== false) {
+      play();
+    }
   }
 
   // ================================================
