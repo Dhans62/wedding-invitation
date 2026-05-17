@@ -11,25 +11,24 @@
   --color-text:         #f0ebe3;
   --color-text-muted:   #9e9188;
   --color-border:       #3a3028;
-  --color-overlay:      rgba(26, 22, 18, 0.75);
 
   --font-heading: 'Cormorant Garamond', serif;
   --font-arabic:  'Amiri', serif;
   --font-body:    'DM Sans', sans-serif;
 
-  --max-width:        500px;
-  --section-pad-v:    5rem;
-  --section-pad-h:    1.5rem;
+  --max-width:      500px;
+  --section-pad-v:  5rem;
+  --section-pad-h:  1.5rem;
 
   --radius-sm:  6px;
   --radius-md:  12px;
   --radius-lg:  20px;
 
-  --ease-out:   cubic-bezier(0.0, 0.0, 0.2, 1);
-  --ease-in-out:cubic-bezier(0.4, 0.0, 0.2, 1);
-  --dur-fast:   0.2s;
-  --dur-base:   0.4s;
-  --dur-slow:   0.7s;
+  --ease-out:    cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --dur-fast: 0.2s;
+  --dur-base: 0.4s;
+  --dur-slow: 0.7s;
 }
 
 /* ================================
@@ -47,7 +46,7 @@ html {
 }
 
 body {
-  background-color: var(--color-bg);
+  background-color: #120e0b;
   color: var(--color-text);
   font-family: var(--font-body);
   font-weight: 300;
@@ -81,6 +80,44 @@ input, textarea {
   font-family: inherit;
   font-size: inherit;
 }
+
+/* ================================
+   SCROLL LOCK
+   Aktif saat cover tampil.
+   Dilepas main.js setelah buka.
+   ================================ */
+body.cover-active {
+  overflow: hidden;
+  height: 100dvh;
+}
+
+/* ================================
+   FIXED BACKGROUND
+   ================================ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: #120e0b;
+  background-image:
+    radial-gradient(ellipse 160% 50% at 10%   0%,   rgba(201, 169, 110, 0.16) 0%, transparent 55%),
+    radial-gradient(ellipse 120% 60% at 90%  100%,  rgba(139,  90,  40, 0.10) 0%, transparent 55%),
+    radial-gradient(ellipse  80% 80% at 50%   50%,  rgba( 26,  18,  10, 0.65) 0%, transparent 100%),
+    linear-gradient(160deg, #1a1208 0%, #0e0b08 50%, #141009 100%);
+}
+
+/* DENGAN FOTO: uncomment saat foto tersedia
+body::before {
+  background-color: #120e0b;
+  background-image:
+    linear-gradient(to bottom, rgba(12,9,6,0.88) 0%, rgba(12,9,6,0.70) 100%),
+    url('../images/backgrounds/bg.webp');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+*/
 
 /* ================================
    LAYOUT UTILITIES
@@ -157,10 +194,13 @@ input, textarea {
 
 /* ================================
    MAIN CONTENT WRAPPER
+   display:none awal — tidak makan
+   ruang DOM, cover tidak bisa
+   discroll ke area kosong.
    ================================ */
 .main-content {
+  display: none;
   opacity: 0;
-  pointer-events: none;
   transition: opacity var(--dur-slow) var(--ease-out);
 }
 

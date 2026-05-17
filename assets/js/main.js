@@ -1,208 +1,281 @@
 /**
  * main.js
- * Orkestrator utama:
- * - Tombol "Buka Undangan" → transisi + audio
- * - Scroll reveal untuk semua section
- * - Toggle amplop digital
- * - Salin nomor rekening
+ * Orkestrator utama. Urutan init:
+ * 1. Cek sessionStorage → skip cover jika sudah dibuka
+ * 2. Scroll lock pada cover
+ * 3. Tombol "Buka Undangan"
+ * 4. IntersectionObserver untuk scroll reveal
+ * 5. Gift toggle
+ * 6. Copy rekening
  */
 (function () {
   'use strict';
 
   // ================================================
-  // BUKA UNDANGAN
+  // SHOW MAIN CONTENT
+  // withAnimation: false → langsung tampil (refresh)
+  // withAnimation: true  → dengan transisi (klik buka)
   // ================================================
-  function initOpenButton() {
-    const btnOpen     = document.getElementById('btnOpen');
+  function showMainContent(withAnimation) {
     const cover       = document.getElementById('cover');
     const mainContent = document.getElementById('mainContent');
+    if (!mainContent) return;
 
-    if (!btnOpen || !cover || !mainContent) return;
+    if (withAnimation) {
+      // Animasi cover keluar
+      if (cover) cover.classList.add('exiting');
 
-    btnOpen.addEventListener('click', function () {
-      // Nonaktifkan tombol agar tidak diklik dua kali
-      btnOpen.disabled = true;
-
-      // Animasi keluar cover
-      cover.classList.add('exiting');
-
-      // Setelah animasi cover selesai (~700ms)
       setTimeout(function () {
-        cover.style.display = 'none';
+        if (cover) cover.style.display = 'none';
+
+        // Buka scroll
+        document.body.classList.remove('cover-active');
 
         // Tampilkan main content
+        mainContent.style.display = 'block';
         mainContent.removeAttribute('aria-hidden');
-        mainContent.classList.add('visible');
 
-        // Scroll ke atas
-        window.scrollTo({ top: 0, behavior: 'instant' });
-
-        // Inisiasi audio
-        if (window.WeddingAudio) {
-          window.WeddingAudio.init();
-        }
-
-        // Trigger scroll reveal untuk elemen yang sudah di viewport
-        checkReveal();
-      }, 700);
-    });
-  }
-
-  // ================================================
-  // SCROLL REVEAL
-  // ================================================
-  function initScrollReveal() {
-    // Tambahkan class .reveal ke semua elemen yang ingin di-reveal
-    const targets = document.querySelectorAll(
-      '.section-bismillah .container > *, ' +
-      '.section-mempelai .section-intro, ' +
-      '.section-mempelai .couple-card, ' +
-      '.section-mempelai .couple-separator, ' +
-      '.section-event .event-card, ' +
-      '.section-galeri .section-title, ' +
-      '.section-galeri .ornament-line, ' +
-      '.section-galeri .gallery-item, ' +
-      '.section-rsvp .section-title, ' +
-      '.section-rsvp .ornament-line, ' +
-      '.section-rsvp .section-subtitle, ' +
-      '.section-rsvp .rsvp-form, ' +
-      '.section-amplop .section-title, ' +
-      '.section-amplop .ornament-line, ' +
-      '.section-amplop .section-subtitle, ' +
-      '.section-amplop .btn-gift-toggle, ' +
-      '.section-penutup .container > *'
-    );
-
-    targets.forEach(function (el) {
-      el.classList.add('reveal');
-    });
-
-    checkReveal();
-  }
-
-  function checkReveal() {
-    const elements = document.querySelectorAll('.reveal:not(.visible)');
-    elements.forEach(function (el) {
-      if (isInViewport(el)) {
-        el.classList.add('visible');
-      }
-    });
-  }
-
-  function isInViewport(el) {
-    const rect = el.getBoundingClientRect();
-    return rect.top < window.innerHeight * 0.88;
-  }
-
-  function initScrollListener() {
-    let ticking = false;
-    window.addEventListener('scroll', function () {
-      if (!ticking) {
+        // Beri satu frame agar display:block diterapkan
+        // sebelum opacity transition
         requestAnimationFrame(function () {
-          checkReveal();
-          ticking = false;
+          requestAnimationFrame(function () {
+            mainContent.classList.add('visible');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+
+            // Mulai audio
+            if (window.WeddingAudio) window.WeddingAudio.init();
+
+            // Inisiasi observer setelah konten tampil
+            initObserver();
+          });
         });
-        ticking = true;
+      }, 700);
+
+    } else {
+      // Langsung — dari sessionStorage (refresh)
+      if (cover) cover.style.display = 'none';
+      document.body.classList.remove('cover-active');
+
+      mainContent.style.display = 'block';
+      mainContent.removeAttribute('aria-hidden');
+      mainContent.classList.add('visible');
+
+      // Langsung init observer
+      initObserver();
+
+      // Scroll ke posisi tersimpan (opsional)
+      const savedPos = sessionStorage.getItem('scrollPos');
+      if (savedPos) {
+        setTimeout(function () {
+          window.scrollTo({ top: parseInt(savedPos, 10), behavior: 'instant' });
+        }, 50);
       }
+    }
+  }
+
+  // ================================================
+  // SESSION STORAGE — ingat state per sesi
+  // Jika tamu refresh, langsung ke konten
+  // Jika tamu baru (link baru), lihat cover dulu
+  // ================================================
+  function checkSession() {
+    if (sessionStorage.getItem('invitationOpened') === 'true') {
+      showMainContent(false);
+      return true;
+    }
+    return false;
+  }
+
+  // Simpan posisi scroll agar bisa restore setelah refresh
+  function initScrollPositionSave() {
+    window.addEventListener('scroll', function () {
+      sessionStorage.setItem('scrollPos', window.scrollY.toString());
     }, { passive: true });
   }
 
   // ================================================
-  // AMPLOP DIGITAL — toggle buka/tutup
+  // OPEN BUTTON
   // ================================================
-  function initGiftToggle() {
-    const btnOpen  = document.getElementById('btnGiftToggle');
-    const btnClose = document.getElementById('btnGiftClose');
-    const content  = document.getElementById('giftContent');
-
-    if (!btnOpen || !content) return;
-
-    function openGift() {
-      content.classList.remove('hidden');
-      // Timeout agar display:block terapply dulu sebelum class .open
-      requestAnimationFrame(function () {
-        content.classList.add('open');
-        btnOpen.setAttribute('aria-expanded', 'true');
-        content.setAttribute('aria-hidden', 'false');
-      });
-    }
-
-    function closeGift() {
-      content.classList.remove('open');
-      btnOpen.setAttribute('aria-expanded', 'false');
-      content.setAttribute('aria-hidden', 'true');
-      // Tunggu transisi selesai baru hidden
-      setTimeout(function () {
-        // Cek lagi supaya tidak konflik kalau user buka ulang cepat
-        if (!content.classList.contains('open')) {
-          content.classList.add('hidden');
-        }
-      }, 500);
-    }
+  function initOpenButton() {
+    const btnOpen = document.getElementById('btnOpen');
+    if (!btnOpen) return;
 
     btnOpen.addEventListener('click', function () {
-      if (content.classList.contains('open')) {
-        closeGift();
-      } else {
-        openGift();
-      }
+      btnOpen.disabled = true;
+      sessionStorage.setItem('invitationOpened', 'true');
+      sessionStorage.removeItem('scrollPos');
+      showMainContent(true);
+    });
+  }
+
+  // ================================================
+  // INTERSECTION OBSERVER — scroll reveal
+  // Lebih smooth dari scroll event listener.
+  // Tidak ada jank karena tidak berjalan di main thread.
+  // ================================================
+  var observer = null;
+
+  function initObserver() {
+    if (observer) {
+      observer.disconnect();
+    }
+
+    // Tambah class reveal ke semua target
+    var selectors = [
+      '.section-bismillah .container > *',
+      '.section-mempelai .section-intro',
+      '.section-mempelai .couple-card',
+      '.section-mempelai .couple-separator',
+      '.section-event .event-card',
+      '.section-galeri .section-title',
+      '.section-galeri .ornament-line',
+      '.section-galeri .gallery-item',
+      '.section-rsvp .section-title',
+      '.section-rsvp .ornament-line',
+      '.section-rsvp .section-subtitle',
+      '.section-rsvp .rsvp-form',
+      '.section-amplop .section-title',
+      '.section-amplop .ornament-line',
+      '.section-amplop .section-subtitle',
+      '.section-amplop .btn-gift-toggle',
+      '.section-penutup .container > *',
+    ];
+
+    var targets = document.querySelectorAll(selectors.join(', '));
+
+    // Beri delay berbeda per posisi untuk stagger effect
+    targets.forEach(function (el, i) {
+      // Hitung delay berdasarkan posisi dalam parent
+      var siblings = el.parentElement ? el.parentElement.children : [];
+      var sibIndex = Array.from(siblings).indexOf(el);
+      var delay = Math.min(sibIndex * 80, 300); // max 300ms
+
+      el.style.transitionDelay = delay + 'ms';
+      el.classList.add('reveal');
+    });
+
+    observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          // Unobserve setelah muncul — tidak perlu watch lagi
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.08,
+      rootMargin: '0px 0px -30px 0px',
+    });
+
+    targets.forEach(function (el) {
+      observer.observe(el);
+    });
+  }
+
+  // ================================================
+  // GIFT TOGGLE
+  // Tidak pakai .hidden — hanya CSS max-height + opacity
+  // ================================================
+  function initGiftToggle() {
+    var btnToggle = document.getElementById('btnGiftToggle');
+    var btnClose  = document.getElementById('btnGiftClose');
+    var content   = document.getElementById('giftContent');
+    if (!btnToggle || !content) return;
+
+    function open() {
+      content.classList.add('open');
+      btnToggle.setAttribute('aria-expanded', 'true');
+      content.setAttribute('aria-hidden', 'false');
+    }
+
+    function close() {
+      content.classList.remove('open');
+      btnToggle.setAttribute('aria-expanded', 'false');
+      content.setAttribute('aria-hidden', 'true');
+    }
+
+    btnToggle.addEventListener('click', function () {
+      content.classList.contains('open') ? close() : open();
     });
 
     if (btnClose) {
-      btnClose.addEventListener('click', closeGift);
+      btnClose.addEventListener('click', close);
     }
   }
 
   // ================================================
   // COPY REKENING
   // ================================================
-  function initCopyButton() {
-    const btnCopy = document.getElementById('btnCopyRek');
-    const numEl   = document.getElementById('rekeningNum');
+  window.copyText = function (text, btn) {
+    var textEl = btn ? btn.querySelector('.btn-copy-text') : null;
+    var original = textEl ? textEl.textContent : 'Salin';
 
+    function onSuccess() {
+      if (textEl) textEl.textContent = 'Tersalin';
+      if (btn) {
+        btn.style.background = 'var(--color-primary)';
+        btn.style.color = 'var(--color-bg)';
+      }
+      setTimeout(function () {
+        if (textEl) textEl.textContent = original;
+        if (btn) {
+          btn.style.background = '';
+          btn.style.color = '';
+        }
+      }, 2000);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onSuccess).catch(fallback);
+    } else {
+      fallback();
+    }
+
+    function fallback() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        onSuccess();
+      } catch (e) {
+        console.warn('Copy failed:', e);
+      }
+    }
+  };
+
+  function initCopyButton() {
+    var btnCopy = document.getElementById('btnCopyRek');
+    var numEl   = document.getElementById('rekeningNum');
     if (!btnCopy || !numEl) return;
 
     btnCopy.addEventListener('click', function () {
-      const text = numEl.textContent.trim().replace(/\s/g, '');
-      copyText(text, btnCopy);
+      var text = numEl.textContent.replace(/\s|-/g, '');
+      window.copyText(text, btnCopy);
     });
   }
 
-  // Global helper — dipanggil juga dari inline HTML jika ada
-  window.copyText = function (text, btn) {
-    navigator.clipboard.writeText(text).then(function () {
-      const textEl = btn.querySelector('.btn-copy-text');
-      const original = textEl ? textEl.textContent : 'Salin';
-
-      if (textEl) textEl.textContent = 'Tersalin';
-      btn.style.background = 'var(--color-primary)';
-      btn.style.color = 'var(--color-bg)';
-
-      setTimeout(function () {
-        if (textEl) textEl.textContent = original;
-        btn.style.background = '';
-        btn.style.color = '';
-      }, 2000);
-    }).catch(function () {
-      // Fallback untuk browser lama
-      const temp = document.createElement('textarea');
-      temp.value = text;
-      temp.style.position = 'fixed';
-      temp.style.opacity = '0';
-      document.body.appendChild(temp);
-      temp.select();
-      document.execCommand('copy');
-      document.body.removeChild(temp);
-    });
-  };
-
   // ================================================
-  // INIT SEMUA
+  // INIT
   // ================================================
   function init() {
-    initOpenButton();
-    initScrollReveal();
-    initScrollListener();
+    // 1. Lock scroll di cover
+    document.body.classList.add('cover-active');
+
+    // 2. Cek session — kalau sudah dibuka sebelumnya, skip cover
+    var alreadyOpened = checkSession();
+
+    // 3. Setup tombol buka (hanya relevan jika cover tampil)
+    if (!alreadyOpened) {
+      initOpenButton();
+    }
+
+    // 4. Setup lainnya
+    initScrollPositionSave();
     initGiftToggle();
     initCopyButton();
   }
