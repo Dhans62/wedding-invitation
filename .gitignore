@@ -10,8 +10,7 @@ Thumbs.db
 # Logs
 *.log
 
-# Private — jangan commit file asli klien ke repo publik
+# Private
 assets/images/couple/
 assets/images/gallery/
 assets/images/qris.webp
-assets/audio/
