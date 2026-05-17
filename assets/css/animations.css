@@ -81,10 +81,9 @@
 /* ================================
    AUDIO BUTTON PULSE
    ================================ */
-.btn-audio {
-  position: relative;
-}
-
+/* .btn-audio tidak perlu position:relative —
+   position:fixed di sections.css sudah cukup
+   sebagai containing block untuk ::after */
 .btn-audio.playing::after {
   content: '';
   position: absolute;
