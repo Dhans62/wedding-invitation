@@ -1,0 +1,17 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# Private — jangan commit file asli klien ke repo publik
+assets/images/couple/
+assets/images/gallery/
+assets/images/qris.webp
+assets/audio/

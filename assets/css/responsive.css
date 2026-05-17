@@ -1,0 +1,120 @@
+/* ================================
+   MOBILE FIRST — base sudah mobile
+   Breakpoint tambahan di sini
+   ================================ */
+
+/* Small phones */
+@media (max-width: 360px) {
+  :root {
+    --section-pad-h: 1.125rem;
+  }
+
+  .cover-name-bride,
+  .cover-name-groom {
+    font-size: 1.75rem;
+  }
+
+  .couple-photo-frame {
+    width: 100px;
+    height: 130px;
+  }
+
+  .couple-name {
+    font-size: 1rem;
+  }
+
+  .countdown-num {
+    font-size: 1.625rem;
+  }
+
+  .countdown-unit {
+    min-width: 40px;
+  }
+}
+
+/* Tablet & larger (> 600px) */
+@media (min-width: 600px) {
+  :root {
+    --section-pad-h: 2rem;
+  }
+
+  .couple-photo-frame {
+    width: 140px;
+    height: 175px;
+  }
+
+  .couple-name {
+    font-size: 1.25rem;
+  }
+
+  .event-card {
+    padding: 3rem 2.5rem;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .cover-name-bride,
+  .cover-name-groom {
+    font-size: 3rem;
+  }
+
+  .bismillah-text {
+    font-size: 2.25rem;
+  }
+
+  .ayat-arabic {
+    font-size: 1.5rem;
+  }
+}
+
+/* Desktop (> 900px) */
+@media (min-width: 900px) {
+  :root {
+    --max-width: 520px;
+  }
+
+  body {
+    font-size: 16px;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Centered narrow column on desktop */
+  .section-cover,
+  .section,
+  .main-content section {
+    padding-left: calc((100vw - var(--max-width)) / 2);
+    padding-right: calc((100vw - var(--max-width)) / 2);
+  }
+}
+
+/* ================================
+   SAFE AREA (iPhone notch/home bar)
+   ================================ */
+@supports (padding: max(0px)) {
+  .section-cover {
+    padding-top: max(3rem, env(safe-area-inset-top));
+    padding-bottom: max(3rem, env(safe-area-inset-bottom));
+  }
+
+  .btn-audio {
+    bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
+    right: max(1.5rem, env(safe-area-inset-right));
+  }
+}
+
+/* ================================
+   REDUCE MOTION
+   ================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
