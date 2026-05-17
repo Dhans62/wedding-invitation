@@ -16,6 +16,23 @@
   overflow: hidden;
 }
 
+/* ================================
+   SECTION SEPARATORS
+   Garis gradient tipis antar section
+   menggantikan hard edge warna solid
+   ================================ */
+.section + .section {
+  border-top: 1px solid rgba(201, 169, 110, 0.07);
+}
+
+/* Bismillah — sedikit lebih terang untuk highlight */
+.section-bismillah {
+  backdrop-filter: blur(0px);
+}
+
+/* Event card — pastikan card tetap punya surface sendiri */
+
+
 .cover-inner {
   display: flex;
   flex-direction: column;
@@ -173,7 +190,9 @@
    BISMILLAH
    ================================ */
 .section-bismillah {
-  background-color: var(--color-surface);
+  background: rgba(18, 14, 10, 0.55);
+  border-top: 1px solid rgba(201, 169, 110, 0.08);
+  border-bottom: 1px solid rgba(201, 169, 110, 0.08);
   text-align: center;
 }
 
@@ -208,7 +227,7 @@
    MEMPELAI
    ================================ */
 .section-mempelai {
-  background-color: var(--color-bg);
+  background: transparent;
 }
 
 .section-intro {
@@ -298,12 +317,8 @@
 /* ================================
    EVENT (AKAD & RESEPSI)
    ================================ */
-.section-event:nth-of-type(odd) {
-  background-color: var(--color-surface);
-}
-
-.section-event:nth-of-type(even) {
-  background-color: var(--color-bg);
+.section-event {
+  background: transparent;
 }
 
 .event-card {
@@ -451,7 +466,7 @@
    GALERI
    ================================ */
 .section-galeri {
-  background-color: var(--color-surface);
+  background: rgba(18, 14, 10, 0.45);
 }
 
 .gallery-grid {
@@ -484,7 +499,7 @@
    RSVP
    ================================ */
 .section-rsvp {
-  background-color: var(--color-bg);
+  background: transparent;
 }
 
 .rsvp-form {
@@ -658,7 +673,7 @@
    AMPLOP DIGITAL
    ================================ */
 .section-amplop {
-  background-color: var(--color-surface);
+  background: rgba(18, 14, 10, 0.45);
   text-align: center;
 }
 
@@ -817,7 +832,7 @@
    PENUTUP
    ================================ */
 .section-penutup {
-  background-color: var(--color-bg);
+  background: transparent;
   text-align: center;
 }
 

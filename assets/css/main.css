@@ -142,13 +142,16 @@ body::before {
 }
 
 .section {
-  min-height: 100dvh;
+  /* Hapus min-height — void hitam antar section hilang.
+     Tinggi ditentukan konten + padding.
+     Cover tetap 100dvh via .section-cover sendiri. */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: var(--section-pad-v) 0;
+  padding: 5rem 0;
   position: relative;
+  background: transparent;
 }
 
 /* ================================
